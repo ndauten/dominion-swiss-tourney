@@ -2,6 +2,7 @@
 
 import heapq
 import sys
+import re
 
 def astar(start, h, c, trans, isFinal):
   q = [(c(start) + h(start), start)]
@@ -129,8 +130,18 @@ def updateConstraints(constraints, games):
 def updateStandings(players, standings):
   pointsGainedPerPlayer = {}
   print 'Points gathered:'
+
+  # For each player collect the number of points
   for i in xrange(len(players)):
-    pointsGainedPerPlayer[players[i]] = int(raw_input("\t" + players[i] + " : "))
+    pts = raw_input("\n\t" + players[i] + ": ")
+    while True:
+      if re.match('\d+$', pts.strip()):
+        break
+      print "\n\t\tYour selection '" + pts + "' is not a number. Please enter again."
+      pts = raw_input("\t"+ players[i] + ": ")
+
+    pointsGainedPerPlayer[players[i]] = int(pts.strip())
+
 
   standings = map(lambda x: (x[0], x[1]+pointsGainedPerPlayer[x[0]]), standings)
   standings = sorted(standings,key=lambda x: x[1], reverse=True)
