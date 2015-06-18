@@ -4,7 +4,8 @@ import heapq
 import sys
 import re
 import time
-  
+import os
+import threading
 
 # global for logfile
 recordFile = ''
@@ -210,15 +211,36 @@ def rec_raw_input(inStr):
   recordFile.write(input+"\n")
   return input
 
+def statusFileOpen():
+  # File for current statndings and match organization 
+  global gameStatusFile
+  gStatusDirname = "/tmp/swisstourney"
+
+  try:
+    os.mkdir(gStatusDirname)
+  except Exception:
+    pass
+
+  statsFname = "game_status." + str(time.time())
+  statsFP = gStatusDirname + '/' + statsFname
+  currGameFP = gStatusDirname + '/game.txt'
+  gameStatusFile = open(statsFP, 'w')
+  os.unlink(currGameFP)
+  os.symlink(statsFP, currGameFP)
+
+def webServerStart():
+  os.popen("cd /tmp/swisstourney && python2 -m SimpleHTTPServer 8080 2>&1")
+
 def main():
 
   # record user input for state saving
   global recordFile
   recordFile = open('/tmp/game_record.'+str(time.time()), 'w')
 
-  # HTML File for online viewing
-  global gameStatusFile
-  gameStatusFile = open('./status/game_status.txt', 'w')
+  statusFileOpen()
+  t = threading.Thread(target=webServerStart, args=())
+  t.daemon = True
+  t.start()
 
   players =  []
 
@@ -269,6 +291,8 @@ def main():
   print("\n****** Final swiss round results:")
   gameStatusFile.write("\n\n****** Final swiss round results:")
   printStandings(standings)
+
+  rec_raw_input("Hit enter when finished (turns off server output): ")
 
 if __name__ == '__main__':
   main()
