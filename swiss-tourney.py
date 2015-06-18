@@ -126,6 +126,33 @@ def updateConstraints(constraints, games):
           continue
         constraints.add((game[i],game[j]))
 
+def checkStandingsInput(players, pointsGainedPerPlayer):
+
+  ptsCorrect = ''
+
+  while True:
+    # Ask if the point selection is correct
+    print("\n\n\tYou entered the following points: ")
+    for i in xrange(len(players)):
+      print("\t\t" + players[i] + ": " + str(pointsGainedPerPlayer[players[i]]))
+    done = raw_input("\tIs this correct: [y/n] ")
+
+    # Hit enter without choice or choice was not y/n
+    while done != 'y' and done != 'n':
+      done = raw_input("\n\t\tYou did not select 'y' or 'n' please try again: [y/n]")
+
+    if done == 'y':
+      break
+
+    # If they need to update a player, loop for players to update
+    while done != 'y':
+      player = raw_input("\n\tWhich player has an incorrect points?")
+      newpts = raw_input("\n\tEnter the new points for " + player + ": ")
+      print("\n\tModifying " + player + "'s " + "points to: " + newpts)
+      pointsGainedPerPlayer[player] = newpts
+      done = raw_input("\t\tAre you done modifying player points? [y/n]")
+
+  return pointsGainedPerPlayer
 
 def updateStandings(players, standings):
   pointsGainedPerPlayer = {}
@@ -142,8 +169,12 @@ def updateStandings(players, standings):
 
     pointsGainedPerPlayer[players[i]] = int(pts.strip())
 
+  # Validate points 
+  pointsGainedPerPlayer = checkStandingsInput(players, pointsGainedPerPlayer)
 
-  standings = map(lambda x: (x[0], x[1]+pointsGainedPerPlayer[x[0]]), standings)
+  # TODO: Check for point distribution for correct values
+
+  standings = map(lambda x: (x[0], x[1]+int(pointsGainedPerPlayer[x[0]])), standings)
   standings = sorted(standings,key=lambda x: x[1], reverse=True)
   return standings
 
