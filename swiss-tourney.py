@@ -210,8 +210,9 @@ def main():
   global recordFile 
   recordFile = open('/tmp/game_record.'+str(time.time()), 'w')
 
+  
   players =  []
-  numberOfPlayers = int(input("Number of players: "))
+  numberOfPlayers = int(rec_raw_input("Number of players: "))
   for i in xrange(numberOfPlayers):
     players.append(rec_raw_input("\tPlayer " + str(i+1) + ": "))
 
