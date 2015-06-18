@@ -3,6 +3,11 @@
 import heapq
 import sys
 import re
+import time
+  
+
+# global for logfile
+recordFile = ''
 
 def astar(start, h, c, trans, isFinal):
   q = [(c(start) + h(start), start)]
@@ -135,22 +140,22 @@ def checkStandingsInput(players, pointsGainedPerPlayer):
     print("\n\n\tYou entered the following points: ")
     for i in xrange(len(players)):
       print("\t\t" + players[i] + ": " + str(pointsGainedPerPlayer[players[i]]))
-    done = raw_input("\tIs this correct: [y/n] ")
+    done = rec_raw_input("\tIs this correct: [y/n] ")
 
     # Hit enter without choice or choice was not y/n
     while done != 'y' and done != 'n':
-      done = raw_input("\n\t\tYou did not select 'y' or 'n' please try again: [y/n]")
+      done = rec_raw_input("\n\t\tYou did not select 'y' or 'n' please try again: [y/n]")
 
     if done == 'y':
       break
 
     # If they need to update a player, loop for players to update
     while done != 'y':
-      player = raw_input("\n\tWhich player has an incorrect points?")
-      newpts = raw_input("\n\tEnter the new points for " + player + ": ")
+      player = rec_raw_input("\n\tWhich player has an incorrect points?")
+      newpts = rec_raw_input("\n\tEnter the new points for " + player + ": ")
       print("\n\tModifying " + player + "'s " + "points to: " + newpts)
       pointsGainedPerPlayer[player] = newpts
-      done = raw_input("\t\tAre you done modifying player points? [y/n]")
+      done = rec_raw_input("\t\tAre you done modifying player points? [y/n]")
 
   return pointsGainedPerPlayer
 
@@ -160,12 +165,12 @@ def updateStandings(players, standings):
 
   # For each player collect the number of points
   for i in xrange(len(players)):
-    pts = raw_input("\n\t" + players[i] + ": ")
+    pts = rec_raw_input("\n\t" + players[i] + ": ")
     while True:
       if re.match('\d+$', pts.strip()):
         break
       print("\n\t\tYour selection '" + pts + "' is not a number. Please enter again.")
-      pts = raw_input("\t"+ players[i] + ": ")
+      pts = rec_raw_input("\t"+ players[i] + ": ")
 
     pointsGainedPerPlayer[players[i]] = int(pts.strip())
 
@@ -193,15 +198,24 @@ def printStandings(standings):
   for standing in standings:
     print('\t' + standing[0] + ' --> ' + str(standing[1]))
 
+def rec_raw_input(inStr):
+  global recordFile
+  input = raw_input(inStr) 
+  recordFile.write(input+"\n")
+  return input
 
 def main():
+
+  # record user input for state saving
+  global recordFile 
+  recordFile = open('/tmp/game_record.'+str(time.time()), 'w')
 
   players =  []
   numberOfPlayers = int(input("Number of players: "))
   for i in xrange(numberOfPlayers):
-    players.append(raw_input("\tPlayer " + str(i+1) + ": "))
+    players.append(rec_raw_input("\tPlayer " + str(i+1) + ": "))
 
-  playersPerGame = int(raw_input("\nNumber of players per game: "))
+  playersPerGame = int(rec_raw_input("\nNumber of players per game: "))
 
   numberOfByePlayers = 0
   if len(players) % playersPerGame != 0:
@@ -217,7 +231,7 @@ def main():
   for i in xrange(numberOfByePlayers-1):
     constraints.add(('bye' + str(i+1),'bye' + str(i+2)))
 
-  numberOfRounds = int(raw_input("\nNumber of rounds: "))
+  numberOfRounds = int(rec_raw_input("\nNumber of rounds: "))
 
   for n in xrange(numberOfRounds):
     print('----- Round ' + str(n+1) + ' -----')
