@@ -3,7 +3,7 @@
     - [ ] Fix: when a-* cannot satisfy the constraints for not playing people
     - [ ] Add constraint for getting to games of specific types
 - [ ] State saving
-    - [ ] Store all input from user to text file, so we can drive a whole test
+    - [x] Store all input from user to text file, so we can drive a whole test
       auto if fail
 - [ ] Validation
     - [x] validate integer on point
