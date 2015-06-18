@@ -151,7 +151,7 @@ def checkStandingsInput(players, pointsGainedPerPlayer):
 
     # If they need to update a player, loop for players to update
     while done != 'y':
-      player = rec_raw_input("\n\tWhich player has an incorrect points?")
+      player = rec_raw_input("\n\tWhich player has an incorrect points? ")
       newpts = rec_raw_input("\n\tEnter the new points for " + player + ": ")
       print("\n\tModifying " + player + "'s " + "points to: " + newpts)
       pointsGainedPerPlayer[player] = newpts
@@ -210,20 +210,28 @@ def main():
   global recordFile 
   recordFile = open('/tmp/game_record.'+str(time.time()), 'w')
 
-  
   players =  []
-  numberOfPlayers = int(rec_raw_input("Number of players: "))
-  for i in xrange(numberOfPlayers):
-    players.append(rec_raw_input("\tPlayer " + str(i+1) + ": "))
+
+  # read names from file if desired 
+  if rec_raw_input("\nWould you like to read players from a file (default: n)? [y/n] ") == 'y':
+    playerFileStr = rec_raw_input("Path to file with the player names? ")
+    playerFile = open(playerFileStr,'r')
+    for line in playerFile:
+      players.append(line.strip())
+      print "\tAdding player: " + line.strip()
+  else:
+    numberOfPlayers = int(rec_raw_input("Number of players: "))
+    for i in xrange(numberOfPlayers):
+      players.append(rec_raw_input("\tPlayer " + str(i+1) + ": "))
 
   playersPerGame = int(rec_raw_input("\nNumber of players per game: "))
-
   numberOfByePlayers = 0
   if len(players) % playersPerGame != 0:
     for i in xrange(playersPerGame - len(players) % playersPerGame):
       numberOfPlayers += 1
       numberOfByePlayers += 1
       players.append('bye' + str(i+1))
+
   numberOfGames = len(players) / playersPerGame
 
   standings = map(lambda x: tuple([x,0]), players)
