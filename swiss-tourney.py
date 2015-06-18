@@ -1,4 +1,4 @@
-#!/usr/bin/python
+##### This only works with python2
 
 import heapq
 import sys
@@ -129,7 +129,7 @@ def updateConstraints(constraints, games):
 
 def updateStandings(players, standings):
   pointsGainedPerPlayer = {}
-  print 'Points gathered:'
+  print('Points gathered:')
 
   # For each player collect the number of points
   for i in xrange(len(players)):
@@ -137,7 +137,7 @@ def updateStandings(players, standings):
     while True:
       if re.match('\d+$', pts.strip()):
         break
-      print "\n\t\tYour selection '" + pts + "' is not a number. Please enter again."
+      print("\n\t\tYour selection '" + pts + "' is not a number. Please enter again.")
       pts = raw_input("\t"+ players[i] + ": ")
 
     pointsGainedPerPlayer[players[i]] = int(pts.strip())
@@ -152,21 +152,21 @@ def printGames(games):
   count = 0;
   for game in games:
     count += 1
-    print 'Game ' + str(count)
+    print('Game ' + str(count))
     for playerID in game:
-      print '\t' + playerID
+      print('\t' + playerID)
 
 
 def printStandings(standings):
-  print '\nCurrent Results:'
+  print('\nCurrent Results:')
   for standing in standings:
-    print '\t' + standing[0] + ' --> ' + str(standing[1])
+    print('\t' + standing[0] + ' --> ' + str(standing[1]))
 
 
 def main():
 
   players =  []
-  numberOfPlayers = int(raw_input("Number of players: "))
+  numberOfPlayers = int(input("Number of players: "))
   for i in xrange(numberOfPlayers):
     players.append(raw_input("\tPlayer " + str(i+1) + ": "))
 
@@ -189,7 +189,7 @@ def main():
   numberOfRounds = int(raw_input("\nNumber of rounds: "))
 
   for n in xrange(numberOfRounds):
-    print '----- Round ' + str(n+1) + ' -----'
+    print('----- Round ' + str(n+1) + ' -----')
     games = getNextRoundGames(standings, constraints, playersPerGame, numberOfGames)
     printGames(games)
     updateConstraints(constraints, games)
