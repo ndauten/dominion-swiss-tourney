@@ -4,7 +4,9 @@ import heapq
 import sys
 import re
 import time
-  
+import os
+import threading
+from multiprocessing import Process
 
 # global for logfile
 recordFile = ''
@@ -240,6 +242,7 @@ def printGames(games):
     for playerID in game:
       print('\t\t' + playerID)
       gameStatusFile.write('\n\t\t' + playerID)
+  gameStatusFile.flush()
 
 
 def printStandings(standings):
@@ -249,6 +252,7 @@ def printStandings(standings):
   for standing in standings:
     print('\t\t' + standing[0] + ' --> ' + str(standing[1]))
     gameStatusFile.write('\n\t\t' + standing[0] + ' --> ' + str(standing[1]))
+  gameStatusFile.flush()
 
 def printConstraintsList(constraintsList):
   global gameStatusFile
@@ -262,7 +266,29 @@ def rec_raw_input(inStr):
   global recordFile
   input = raw_input(inStr)
   recordFile.write(input+"\n")
+  recordFile.flush()
   return input
+
+def statusFileOpen():
+  # File for current statndings and match organization 
+  global gameStatusFile
+  gStatusDirname = "/tmp/swisstourney"
+
+  try:
+    os.mkdir(gStatusDirname)
+  except Exception:
+    pass
+
+  statsFname = "game_status." + str(time.time())
+  statsFP = gStatusDirname + '/' + statsFname
+  currGameFP = gStatusDirname + '/game.txt'
+  gameStatusFile = open(statsFP, 'w')
+  os.unlink(currGameFP)
+  os.symlink(statsFP, currGameFP)
+
+def webServerStart():
+  os.popen("cd /tmp/swisstourney && python2 -m SimpleHTTPServer 8080")
+  #os.system("cd /tmp/swisstourney && python2 -m SimpleHTTPServer 8080 2>&1")
 
 def main():
 
@@ -270,9 +296,11 @@ def main():
   global recordFile
   recordFile = open('/tmp/game_record.'+str(time.time()), 'w')
 
-  # HTML File for online viewing
-  global gameStatusFile
-  gameStatusFile = open('./status/game_status.txt', 'w')
+  statusFileOpen()
+  #t = threading.Thread(target=webServerStart, args=())
+  #t = Process(target=webServerStart, args=())
+  #t.daemon = True
+  #t.start()
 
   players =  []
 
@@ -292,6 +320,7 @@ def main():
   gameStatusFile.write('\n<<<< Players >>>>')
   for p in players:
     gameStatusFile.write('\n\tPlayer: ' + p)
+  gameStatusFile.flush()
 
   playersPerGame = int(rec_raw_input("\nNumber of players per game: "))
   numberOfByePlayers = 0
@@ -323,6 +352,17 @@ def main():
   print("\n****** Final swiss round results:")
   gameStatusFile.write("\n\n****** Final swiss round results:")
   printStandings(standings)
+  gameStatusFile.flush()
+
+  #answer = rec_raw_input("Stop running server now? [y/N]: ")
+  #time.sleep(10)
+  #t.terminate()
+  #while True:
+  #  if answer in [ "Y", "y" ]:
+  #      #os.popen("kill -9 "+str(t))
+  #      break
+  #  # Do something here - maybe cleanup?
+  #  # Terminate gracefully
 
 if __name__ == '__main__':
   main()
