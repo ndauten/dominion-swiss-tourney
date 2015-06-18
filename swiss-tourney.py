@@ -8,6 +8,7 @@ import time
 
 # global for logfile
 recordFile = ''
+gameStatusFile = ''
 
 def astar(start, h, c, trans, isFinal):
   q = [(c(start) + h(start), start)]
@@ -161,7 +162,7 @@ def checkStandingsInput(players, pointsGainedPerPlayer):
 
 def updateStandings(players, standings):
   pointsGainedPerPlayer = {}
-  print('Points gathered:')
+  print('\tPoints gathered:')
 
   # For each player collect the number of points
   for i in xrange(len(players)):
@@ -183,32 +184,41 @@ def updateStandings(players, standings):
   standings = sorted(standings,key=lambda x: x[1], reverse=True)
   return standings
 
-
 def printGames(games):
+  global gameStatusFile
   count = 0;
   for game in games:
     count += 1
-    print('Game ' + str(count))
+    print('\tGame ' + str(count))
+    gameStatusFile.write('\n\tGame ' + str(count))
     for playerID in game:
-      print('\t' + playerID)
+      print('\t\t' + playerID)
+      gameStatusFile.write('\n\t\t' + playerID)
 
 
 def printStandings(standings):
-  print('\nCurrent Results:')
+  global gameStatusFile
+  print('\n\tCurrent Results:')
+  gameStatusFile.write('\n\tCurrent Results:')
   for standing in standings:
-    print('\t' + standing[0] + ' --> ' + str(standing[1]))
+    print('\t\t' + standing[0] + ' --> ' + str(standing[1]))
+    gameStatusFile.write('\n\t\t' + standing[0] + ' --> ' + str(standing[1]))
 
 def rec_raw_input(inStr):
   global recordFile
-  input = raw_input(inStr) 
+  input = raw_input(inStr)
   recordFile.write(input+"\n")
   return input
 
 def main():
 
   # record user input for state saving
-  global recordFile 
+  global recordFile
   recordFile = open('/tmp/game_record.'+str(time.time()), 'w')
+
+  # HTML File for online viewing
+  global gameStatusFile
+  gameStatusFile = open('./status/game_status.txt', 'w')
 
   players =  []
 
@@ -223,6 +233,11 @@ def main():
     numberOfPlayers = int(rec_raw_input("Number of players: "))
     for i in xrange(numberOfPlayers):
       players.append(rec_raw_input("\tPlayer " + str(i+1) + ": "))
+  
+  # Print out the players playing
+  gameStatusFile.write('\n<<<< Players >>>>')
+  for p in players:
+    gameStatusFile.write('\n\tPlayer: ' + p)
 
   playersPerGame = int(rec_raw_input("\nNumber of players per game: "))
   numberOfByePlayers = 0
@@ -243,12 +258,17 @@ def main():
   numberOfRounds = int(rec_raw_input("\nNumber of rounds: "))
 
   for n in xrange(numberOfRounds):
-    print('----- Round ' + str(n+1) + ' -----')
+    print('\n\n----- Round ' + str(n+1) + ' -----')
+    gameStatusFile.write('\n\n----- Round ' + str(n+1) + ' -----')
     games = getNextRoundGames(standings, constraints, playersPerGame, numberOfGames)
     printGames(games)
     updateConstraints(constraints, games)
     standings = updateStandings(players, standings)
     printStandings(standings)
+
+  print("\n****** Final swiss round results:")
+  gameStatusFile.write("\n\n****** Final swiss round results:")
+  printStandings(standings)
 
 if __name__ == '__main__':
   main()
