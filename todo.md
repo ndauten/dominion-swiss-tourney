@@ -1,6 +1,6 @@
 
 - [ ] Engine
-    - [ ] Fix: when a-* cannot satisfy the constraints for not playing people
+    - [x] Fix: when a-* cannot satisfy the constraints for not playing people
     - [ ] Add constraint for getting to games of specific types
 - [ ] State saving
     - [x] Store all input from user to text file, so we can drive a whole test
