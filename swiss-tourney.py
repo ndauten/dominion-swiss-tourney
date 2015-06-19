@@ -13,15 +13,29 @@ recordFile = ''
 gameStatusFile = ''
 
 def astar(start, h, c, trans, isFinal):
-  q = [(c(start) + h(start), start)]
+  startCost = c(start) + h(start)
+  q = [(startCost, start)]
   heapq.heapify(q)
+
   seen = set([start])
 
+  bestSoFar = start
+  bestSoFarCost = c(start) + h(start)
+  bestSoFarLength = len(start)
+
   while True:
+    if not q:
+      return (bestSoFar, False)
+
     (cost, s) = heapq.heappop(q)
     
     if isFinal(s):
-      return s
+      return (s, True)
+
+    if len(s) > bestSoFarLength or (len(s) is bestSoFarLength and  cost < bestSoFarCost):
+      bestSoFar = s
+      bestSoFarCost = cost
+      bestSoFarLength = len(s)
 
     newstates = trans(s)
     for new in newstates:
@@ -110,6 +124,8 @@ def getPossibleMatchups(standings, constraints, playersPerGame):
 
 
 def getNextRoundGames(standings, constraints, playersPerGame, numberOfGames):
+  global gameStatusFile
+
   possibleMatchups = getPossibleMatchups(standings, constraints, playersPerGame)
 
   start = frozenset()
@@ -117,7 +133,37 @@ def getNextRoundGames(standings, constraints, playersPerGame, numberOfGames):
   c = lambda state: cost(state, standings)
   trans = lambda state: generateNextStates(state, possibleMatchups)
   isFinal = lambda state: isFinalState(state, numberOfGames)
-  best = astar(start, h, c, trans, isFinal)
+
+  (best, Completed) = astar(start, h, c, trans, isFinal)
+  while not Completed:
+    unassignedPlayers = set(map(lambda (pl,pts): pl, standings))
+    for matchup in best:
+      for idx in matchup:
+        unassignedPlayers.remove(standings[idx][0])
+
+#    print('\nStuck with these games:')
+#    gameStatusFile.write('\nStack with these games:')
+#    printGames(map(lambda matchup: tuple(map(lambda idx: standings[idx][0], matchup)), best))
+
+#    print('\nUnassigned players:' + str(list(unassignedPlayers)))
+#    gameStatusFile.write('\nUnassigned players:' + str(list(unassignedPlayers)))
+
+
+    relevantConstraintsList = filter(lambda (pl0,pl1): pl0 in unassignedPlayers and pl1 in unassignedPlayers, constraints)
+
+#    print('\nRemoving relevant constraints:')
+#    gameStatusFile.write('\nRemoving relevant constraints:')
+#    printConstraintsList(relevantConstraintsList)
+
+    constraints -= set(relevantConstraintsList)
+
+ #   print('\nRetrying:')
+ #   gameStatusFile.write('\nRetrying:')
+
+    possibleMatchups = getPossibleMatchups(standings, constraints, playersPerGame)
+    start = best
+    trans = lambda state: generateNextStates(state, possibleMatchups)
+    (best, Completed) = astar(start, h, c, trans, isFinal)
 
   return map(lambda matchup: tuple(map(lambda idx: standings[idx][0], matchup)), best)
 
@@ -207,6 +253,14 @@ def printStandings(standings):
     print('\t\t' + standing[0] + ' --> ' + str(standing[1]))
     gameStatusFile.write('\n\t\t' + standing[0] + ' --> ' + str(standing[1]))
   gameStatusFile.flush()
+
+def printConstraintsList(constraintsList):
+  global gameStatusFile
+  count = 0;
+  for constraint in constraintsList:
+    count += 1
+    print('\tConstraint ' + str(count) + ': ' + constraint[0] + ' not in the same table as ' + constraint[1])
+    gameStatusFile.write('\tConstraint ' + str(count) + ': ' + constraint[0] + ' not in the same table as ' + constraint[1])
 
 def rec_raw_input(inStr):
   global recordFile
