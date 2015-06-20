@@ -272,18 +272,22 @@ def rec_raw_input(inStr):
 def statusFileOpen():
   # File for current statndings and match organization 
   global gameStatusFile
-  gStatusDirname = "/tmp/swisstourney"
+  gStatusDirname = "/usr/share/nginx/html/dominion"
 
   try:
     os.mkdir(gStatusDirname)
   except Exception:
-    pass
+    # TODO: fix this to be more flexible
+    print "You must create the dominion directory: " + gStatusDirname
 
   statsFname = "game_status." + str(time.time())
   statsFP = gStatusDirname + '/' + statsFname
   currGameFP = gStatusDirname + '/game.txt'
   gameStatusFile = open(statsFP, 'w')
-  os.unlink(currGameFP)
+  try:
+    os.unlink(currGameFP)
+  except Exception:
+    pass
   os.symlink(statsFP, currGameFP)
 
 def webServerStart():
