@@ -212,16 +212,34 @@ def updateStandings(players, standings):
   pointsGainedPerPlayer = {}
   print('\tPoints gathered:')
 
-  # For each player collect the number of points
-  for i in xrange(len(players)):
-    pts = rec_raw_input("\n\t" + players[i] + ": ")
+  i = 0
+  while i < len(players):
+
+    # Ask which game is done
+    player = rec_raw_input('\tUpdate points for what player? ')
+
+    while(player not in players): 
+      player = rec_raw_input("Player is not playing.  Try again: ")
+
+    pts = rec_raw_input("\n\tPoints earned by " + player + ": ")
     while True:
       if re.match('\d+$', pts.strip()):
         break
       print("\n\t\tYour selection '" + pts + "' is not a number. Please enter again.")
-      pts = rec_raw_input("\t"+ players[i] + ": ")
+      pts = rec_raw_input("\t"+ player + ": ")
 
-    pointsGainedPerPlayer[players[i]] = int(pts.strip())
+    pointsGainedPerPlayer[player] = int(pts.strip())
+    i += 1
+
+  # For each player collect the number of points
+  #for i in xrange(len(players)):
+    #pts = rec_raw_input("\n\t" + players[i] + ": ")
+    #while True:
+    #  if re.match('\d+$', pts.strip()):
+    #    break
+    #  print("\n\t\tYour selection '" + pts + "' is not a number. Please enter again.")
+    #  pts = rec_raw_input("\t"+ players[i] + ": ")
+    #pointsGainedPerPlayer[players[i]] = int(pts.strip())
 
   # Validate points 
   pointsGainedPerPlayer = checkStandingsInput(players, pointsGainedPerPlayer)
