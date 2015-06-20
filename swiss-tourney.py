@@ -124,8 +124,6 @@ def getPossibleMatchups(standings, constraints, playersPerGame):
 
 
 def getNextRoundGames(standings, constraints, playersPerGame, numberOfGames):
-  global gameStatusFile
-
   possibleMatchups = getPossibleMatchups(standings, constraints, playersPerGame)
 
   start = frozenset()
@@ -142,26 +140,24 @@ def getNextRoundGames(standings, constraints, playersPerGame, numberOfGames):
         unassignedPlayers.remove(standings[idx][0])
 
 #    print('\nStuck with these games:')
-#    gameStatusFile.write('\nStack with these games:')
 #    printGames(map(lambda matchup: tuple(map(lambda idx: standings[idx][0], matchup)), best))
 
 #    print('\nUnassigned players:' + str(list(unassignedPlayers)))
-#    gameStatusFile.write('\nUnassigned players:' + str(list(unassignedPlayers)))
 
 
-    relevantConstraintsList = filter(lambda (pl0,pl1): pl0 in unassignedPlayers and pl1 in unassignedPlayers, constraints)
+    relevantConstraintsList = filter(lambda (pl0,pl1): pl0 in unassignedPlayers and pl1 in unassignedPlayers and not (pl0.startswith('bye') and pl1.startswith('bye')), constraints)
+    if not relevantConstraintsList:
+       raise ValueError('releveant cpnstraints empty')
 
 #    print('\nRemoving relevant constraints:')
-#    gameStatusFile.write('\nRemoving relevant constraints:')
 #    printConstraintsList(relevantConstraintsList)
 
     constraints -= set(relevantConstraintsList)
 
- #   print('\nRetrying:')
- #   gameStatusFile.write('\nRetrying:')
+#    print('\nRetrying:')
 
     possibleMatchups = getPossibleMatchups(standings, constraints, playersPerGame)
-    start = best
+    start = frozenset()
     trans = lambda state: generateNextStates(state, possibleMatchups)
     (best, Completed) = astar(start, h, c, trans, isFinal)
 
@@ -171,11 +167,11 @@ def getNextRoundGames(standings, constraints, playersPerGame, numberOfGames):
 def updateConstraints(constraints, games):
   for game in games:
     for i in xrange(len(game)-1):
-      if game[i].startswith('bye'):
-        continue
+      #if game[i].startswith('bye'):
+      #  continue
       for j in xrange(i+1, len(game)):
-        if game[j].startswith('bye'):
-          continue
+        #if game[j].startswith('bye'):
+        #  continue
         if (game[i],game[j]) in constraints or (game[j],game[i]) in constraints:
           continue
         constraints.add((game[i],game[j]))
@@ -278,7 +274,6 @@ def printConstraintsList(constraintsList):
   for constraint in constraintsList:
     count += 1
     print('\tConstraint ' + str(count) + ': ' + constraint[0] + ' not in the same table as ' + constraint[1])
-    gameStatusFile.write('\tConstraint ' + str(count) + ': ' + constraint[0] + ' not in the same table as ' + constraint[1])
 
 def rec_raw_input(inStr):
   global recordFile
@@ -357,9 +352,9 @@ def main():
   standings = map(lambda x: tuple([x,0]), players)
 
   constraints = set()
-  for i in xrange(numberOfByePlayers-1):
-    constraints.add(('bye' + str(i+1),'bye' + str(i+2)))
-
+  for i in xrange(numberOfByePlayers):
+    for j in xrange(i+1, numberOfByePlayers):
+      constraints.add(('bye' + str(i+1),'bye' + str(j+1)))
   numberOfRounds = int(rec_raw_input("\nNumber of rounds: "))
 
   for n in xrange(numberOfRounds):
