@@ -328,6 +328,7 @@ def main():
     for line in playerFile:
       players.append(line.strip())
       print "\tAdding player: " + line.strip()
+    numberOfPlayers = len(players)
   else:
     numberOfPlayers = int(rec_raw_input("Number of players: "))
     for i in xrange(numberOfPlayers):
